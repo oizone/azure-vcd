@@ -12,6 +12,8 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  env:
+    REGION: ${{ secrets.REGION }}
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
@@ -27,14 +29,12 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     
     - name: Delete resource group if exists
-      if: ${{ always() }}
       env:
         RESGROUP: ${{ secrets.RESGROUP }}
       run: az group delete --name $RESGROUP --yes || true
 
     - name: Create resource group
       env:
-        REGION: ${{ secrets.REGION }}
         RESGROUP: ${{ secrets.RESGROUP }}
       run: |
         az group create --location $REGION --name $RESGROUP
