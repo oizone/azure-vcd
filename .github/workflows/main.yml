@@ -31,18 +31,17 @@ jobs:
         RESGROUP: ${{ secrets.RESGROUP }}
       run: echo ::set-env name=RGEXISTS::az group exists --name $RESGROUP
 
-    - name: Check if resouregroup exists
+    - name: Delete resource group if exists
       if: ${{ always() }}
       env:
         RESGROUP: ${{ secrets.RESGROUP }}
       run: az group delete --name $RESGROUP --yes
 
-    - name: Clean previous build / delete resource group and create new
+    - name: Create resource group
       env:
         REGION: ${{ secrets.REGION }}
         RESGROUP: ${{ secrets.RESGROUP }}
       run: |
-        echo ::set-env name=RGEXISTS::az group exists --name $RESGROUP
         az group create --location $REGION --name $RESGROUP
 
     - name: Create network
