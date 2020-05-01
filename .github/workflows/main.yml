@@ -26,6 +26,17 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     
+    - name: Check if resouregroup exists
+      env:
+        RESGROUP: ${{ secrets.RESGROUP }}
+      run: echo ::set-env name=RGEXISTS::az group exists --name $RESGROUP
+
+    - name: Check if resouregroup exists
+      if: ${{ RGEXISTS == "true" }}
+      env:
+        RESGROUP: ${{ secrets.RESGROUP }}
+      run: az group delete --name $RESGROUP --yes
+
     - name: Clean previous build / delete resource group and create new
       env:
         REGION: ${{ secrets.REGION }}
