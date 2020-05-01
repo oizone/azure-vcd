@@ -26,11 +26,6 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     
-    - name: Check if resouregroup exists
-      env:
-        RESGROUP: ${{ secrets.RESGROUP }}
-      run: echo ::set-env name=RGEXISTS::az group exists --name $RESGROUP
-
     - name: Delete resource group if exists
       if: ${{ always() }}
       env:
@@ -53,6 +48,15 @@ jobs:
         az network nsg create --name "vCD-VM-SecGrp" --resource-group $RESGROUP --location $REGION
         az network nsg create --name "vCD-console-SecGrp" --resource-group $RESGROUP --location $REGION
         az network vnet create --name $VNET --resource-group $RESGROUP --address-prefixes "10.255.0.0/24" --location $REGION
+        az network vnet subnet create --address-prefixes "10.255.0.0/29" --name "vCD-AppGW" --resource-group $RESGROUP --vnet-name $VNET
+        az network vnet subnet create --address-prefixes "10.255.0.8/29" --name "vCD-Portal" --resource-group $RESGROUP --vnet-name $VNET --service-endpoints "Microsoft.Sql" --network-security-group "vCD-VM-SecGrp"
+        az network vnet subnet create --address-prefixes "10.255.0.16/29" --name "vCD-Console" --resource-group $RESGROUP --vnet-name $VNET --network-security-group "vCD-console-SecGrp"
+        az network public-ip create --name "vCD-VM" --resource-group $RESGROUP --allocation-method Static --location $REGION --sku Basic
+        az network public-ip create --name "vCD-console" --resource-group $RESGROUP --allocation-method Static --location $REGION  --sku Basic
+        az network public-ip create --name "vCD-portal" --resource-group $RESGROUP --allocation-method Static --location $REGION --sku Standard
+        az network nic create --name "Portal-NIC" --resource-group $RESGROUP --location $REGION --subnet "vCD-Portal" --vnet-name $VNET --public-ip-address "vCD-VM"
+        az network nic create --name "Console-NIC" --resource-group $RESGROUP --location $REGION --subnet "vCD-Console" --vnet-name $VNET --public-ip-address "vCD-console"
+	
 
 
     - name: Allow SSH in
@@ -61,4 +65,13 @@ jobs:
       run: |
         az network nsg rule create --name "AllowInboundSSH" --nsg-name "vCD-VM-SecGrp" --priority 1000 --resource-group $RESGROUP --access Allow --destination-address-prefixes "*" --destination-port-ranges 22 --direction Inbound --protocol Tcp --source-address-prefixes "*" --source-port-ranges "*"
         az network nsg rule create --name "AllowInboundSSH" --nsg-name "vCD-console-SecGrp" --priority 1000 --resource-group $RESGROUP --access Allow --destination-address-prefixes "*" --destination-port-ranges 443 --direction Inbound --protocol Tcp --source-address-prefixes "*" --source-port-ranges "*"
-      
+
+    - name: Create VM
+      env:
+        REGION: ${{ secrets.REGION }}
+        RESGROUP: ${{ secrets.RESGROUP }}
+        VNET: ${{ secrets.VNET }}
+        SSHKEY: ${{ secrets.SSHKEY }}
+      run: |
+        echo "$SSHKEY" > sshid
+        az vm create --name $vmname --resource-group $RESGROUP --location $REGION --admin-username azureuser --image "OpenLogic:CentOS:7.5:latest" --ssh-key-values @sshid --nics "Portal-NIC" "Console-NIC" --size "Standard_B2ms"
