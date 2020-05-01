@@ -56,8 +56,6 @@ jobs:
         az network public-ip create --name "vCD-portal" --resource-group $RESGROUP --allocation-method Static --location $REGION --sku Standard
         az network nic create --name "Portal-NIC" --resource-group $RESGROUP --location $REGION --subnet "vCD-Portal" --vnet-name $VNET --public-ip-address "vCD-VM"
         az network nic create --name "Console-NIC" --resource-group $RESGROUP --location $REGION --subnet "vCD-Console" --vnet-name $VNET --public-ip-address "vCD-console"
-	
-
 
     - name: Allow SSH in
       env:
