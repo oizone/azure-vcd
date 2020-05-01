@@ -70,7 +70,7 @@ jobs:
       env:
         REGION: ${{ secrets.REGION }}
         RESGROUP: ${{ secrets.RESGROUP }}
-        DBNAME: ${{ secret.DBNAME }}
+        DBNAME: ${{ secrets.DBNAME }}
         DBPWD: ${{ secret.DBPWD }}
         DBUSER: ${{ secret.DBUSER }}
       run: |
