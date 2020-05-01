@@ -32,7 +32,7 @@ jobs:
         RESGROUP: ${{ secrets.RESGROUP }}
       run: |
         echo ::set-env name=RGEXISTS::az group exists --name $RESGROUP
-	az group create --location $REGION --name $RESGROUP
+        az group create --location $REGION --name $RESGROUP
 
     - name: Create network
       env:
