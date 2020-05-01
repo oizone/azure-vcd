@@ -32,7 +32,7 @@ jobs:
       run: echo ::set-env name=RGEXISTS::az group exists --name $RESGROUP
 
     - name: Check if resouregroup exists
-      if: ${{ RGEXISTS == "true" }}
+      if: ${{ always() }}
       env:
         RESGROUP: ${{ secrets.RESGROUP }}
       run: az group delete --name $RESGROUP --yes
