@@ -26,5 +26,29 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     
-    - run: |
-        az vm list
+    - name: Clean previous build / delete resource group and create new
+      env:
+        REGION: ${{ secrets.REGION }}
+        RESGROUP: ${{ secrets.RESGROUP }}
+      run: |
+        if "`az group exists --name $RESGROUP`" == "true"; then ; az group delete --name $RESGROUP --yes ; fi
+	az group create --location $REGION --name $RESGROUP
+
+    - name: Create network
+      env:
+        REGION: ${{ secrets.REGION }}
+	RESGROUP: ${{ secrets.RESGROUP }}
+	VNET: ${{ secrets.VNET }}
+      run: |
+        az network nsg create --name "vCD-VM-SecGrp" --resource-group $RESGROUP --location $REGION
+	az network nsg create --name "vCD-console-SecGrp" --resource-group $RESGROUP --location $REGION
+	az network vnet create --name $VNET --resource-group $RESGROUP --address-prefixes "10.255.0.0/24" --location $REGION
+
+
+    - name: Allow SSH in
+      env:
+	RESGROUP: ${{ secrets.RESGROUP }}
+      run: |
+        az network nsg rule create --name "AllowInboundSSH" --nsg-name "vCD-VM-SecGrp" --priority 1000 --resource-group $RESGROUP --access Allow --destination-address-prefixes "*" --destination-port-ranges 22 --direction Inbound --protocol Tcp --source-address-prefixes "*" --source-port-ranges "*"
+	az network nsg rule create --name "AllowInboundSSH" --nsg-name "vCD-console-SecGrp" --priority 1000 --resource-group $RESGROUP --access Allow --destination-address-prefixes "*" --destination-port-ranges 443 --direction Inbound --protocol Tcp --source-address-prefixes "*" --source-port-ranges "*"
+      
