@@ -35,7 +35,7 @@ jobs:
       if: ${{ always() }}
       env:
         RESGROUP: ${{ secrets.RESGROUP }}
-      run: az group delete --name $RESGROUP --yes
+      run: az group delete --name $RESGROUP --yes || true
 
     - name: Create resource group
       env:
