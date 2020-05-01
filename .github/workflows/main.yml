@@ -31,7 +31,7 @@ jobs:
         REGION: ${{ secrets.REGION }}
         RESGROUP: ${{ secrets.RESGROUP }}
       run: |
-        if "`az group exists --name $RESGROUP`" == "true"; then ; az group delete --name $RESGROUP --yes ; fi
+        echo ::set-env name=RGEXISTS::az group exists --name $RESGROUP
 	az group create --location $REGION --name $RESGROUP
 
     - name: Create network
