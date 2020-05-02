@@ -23,6 +23,9 @@ jobs:
       VCDVMOS: "OpenLogic:CentOS:7.5:latest"
       VCDVMUSER: azureuser
       VCDMEDIAURL: https://vmwaredepot.blob.core.windows.net/media/vmware-vcloud-director-distribution-10.1.0-15967253.bin
+      VCDUSER: ${{ secrets.VCDUSER }}
+      VCDEMAIL: ${{ secrets.VCDEMAIL }}
+      VCDPWD: ${{ secrets.VCDPWD }}
       REPOTOKEN: ${{ secrets.SASTOKEN }}
       #DBNAME: vcddb-${{ GITHUB_SHA }}
       DBNAME: vcddb
@@ -42,5 +45,5 @@ jobs:
     
     - name: Configure VM - Install vCD
       run: |
-        az vm run-command invoke --resource-group $RESGROUP --name $VCDVM --command-id RunShellScript --scripts @install.sh --parameters "VCDMEDIAURL=${{ env.VCDMEDIAURL }}" "REPOTOKEN=${{ env.REPOTOKEN }}"
-#"DBNAME=${{ env.DBNAME}}" "DBUSER=${{ env.DBUSER }}" "DBPWD=${{ env.DBPWD }}" "VCDMEDIAURL=${{ env.VCDMEDIAURL }}" "REPOTOKEN=${{ env.REPOTOKEN }}" "VCDUSER=${{ env.VCDUSER }}" "VCDPWD=${{ env.VCDPWD }}" "VCDEMAIL=${{ env.VCDEMAIL }}" "CERTPWD=${{ env.CERTPWD }}"
+        az vm run-command invoke --resource-group $RESGROUP --name $VCDVM --command-id RunShellScript --scripts @install.sh --parameters "VCDMEDIAURL=${{ env.VCDMEDIAURL }}" "DBNAME=${{ env.DBNAME}}" "DBUSER=${{ env.DBUSER }}" "DBPWD=${{ env.DBPWD }}" "VCDMEDIAURL=${{ env.VCDMEDIAURL }}" "VCDUSER=${{ env.VCDUSER }}" "VCDPWD=${{ env.VCDPWD }}" "VCDEMAIL=${{ env.VCDEMAIL }}" "CERTPWD=${{ env.CERTPWD }}"
+#"REPOTOKEN=${{ env.REPOTOKEN }}"
