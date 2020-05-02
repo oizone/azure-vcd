@@ -43,4 +43,4 @@ jobs:
     - name: Configure VM - Install vCD
       run: |
         az vm run-command invoke --resource-group $RESGROUP --name $VCDVM --command-id RunShellScript --scripts @install.sh --parameters "VCDMEDIAURL=${{ env.VCDMEDIAURL }}" "REPOTOKEN=${{ env.REPOTOKEN }}"
-	#"DBNAME=${{ env.DBNAME}}" "DBUSER=${{ env.DBUSER }}" "DBPWD=${{ env.DBPWD }}" "VCDMEDIAURL=${{ env.VCDMEDIAURL }}" "REPOTOKEN=${{ env.REPOTOKEN }}" "VCDUSER=${{ env.VCDUSER }}" "VCDPWD=${{ env.VCDPWD }}" "VCDEMAIL=${{ env.VCDEMAIL }}" "CERTPWD=${{ env.CERTPWD }}"
+#"DBNAME=${{ env.DBNAME}}" "DBUSER=${{ env.DBUSER }}" "DBPWD=${{ env.DBPWD }}" "VCDMEDIAURL=${{ env.VCDMEDIAURL }}" "REPOTOKEN=${{ env.REPOTOKEN }}" "VCDUSER=${{ env.VCDUSER }}" "VCDPWD=${{ env.VCDPWD }}" "VCDEMAIL=${{ env.VCDEMAIL }}" "CERTPWD=${{ env.CERTPWD }}"
