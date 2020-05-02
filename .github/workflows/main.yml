@@ -22,6 +22,8 @@ jobs:
       VCDVMSIZE: "Standard_B2ms"
       VCDVMOS: "OpenLogic:CentOS:7.5:latest"
       VCDVMUSER: azureuser
+      VCDMEDIAURL: https://vmwaredepot.blob.core.windows.net/media/vmware-vcloud-director-distribution-10.1.0-15967253.bin
+      REPOTOKEN: ${{ secrets.SASTOKEN }}
       #DBNAME: vcddb-${{ GITHUB_SHA }}
       DBNAME: vcddb
       DBUSER: ${{ secrets.DBUSER }}
@@ -38,6 +40,6 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     
-    - name: Configure VM - Prepare database
+    - name: Configure VM - Install vCD
       run: |
-        az vm run-command invoke --resource-group $RESGROUP --name $VCDVM --command-id RunShellScript --scripts @dbconfig.sh --parameters "DBNAME=${{ env.DBNAME}}" "DBUSER=${{ env.DBUSER }}" "DBPWD=${{ env.DBPWD }}"
+        az vm run-command invoke --resource-group $RESGROUP --name $VCDVM --command-id RunShellScript --scripts @install.sh --parameters "DBNAME=${{ env.DBNAME}}" "DBUSER=${{ env.DBUSER }}" "DBPWD=${{ env.DBPWD }}" "VCDMEDIAURL=${{ env.VCDMEDIAURL }}" "REPOTOKEN=${{ env.REPOTOKEN }}" "VCDUSER=${{ env.VCDUSER }}" "VCDPWD=${{ env.VCDPWD }}" "VCDEMAIL=${{ env.VCDEMAIL }}" "CERTPWD=${{ env.CERTPWD }}"
