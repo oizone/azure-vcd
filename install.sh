@@ -12,4 +12,3 @@ chmod u+x /tmp/vcd.bin
 
 /opt/vmware/vcloud-director/bin/cell-management-tool system-setup --user $VCDUSER --full-name "VCD System Administrator" --email $VCDEMAIL --system-name `hostname` --installation-id 2 -password $VCDPWD --unattended
 
-reboot

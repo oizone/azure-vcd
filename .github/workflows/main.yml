@@ -13,7 +13,7 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     env:
-      REGION: norwayeast
+      REGION: westeurope
       RESGROUP: vCD
       VNET: vCD-NET
       VCDVM: vCD
