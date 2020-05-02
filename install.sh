@@ -11,4 +11,3 @@ chmod u+x /tmp/vcd.bin
 /tmp/vcd.bin -ip $eth0IP -cons $eth1IP -dbtype postgres -dbhost $DBNAME.postgres.database.azure.com -dbname vcloud -dbuser vcloud@$DBNAME --enable-ceip false -dbpassword $DBPWD -k /tmp/certificates.ks -w $VCDCERTPWD  -unattended
 
 /opt/vmware/vcloud-director/bin/cell-management-tool system-setup --user $VCDUSER --full-name "VCD System Administrator" --email $VCDEMAIL --system-name `hostname` --installation-id 2 -password $VCDPWD --unattended
-
