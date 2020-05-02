@@ -22,7 +22,7 @@ jobs:
       VCDVMSIZE: "Standard_B2ms"
       VCDVMOS: "OpenLogic:CentOS:7.5:latest"
       VCDVMUSER: azureuser
-      DBNAME: ${{ env.RANDOM }}
+      DBNAME: ${{ RANDOM }}
       DBUSER: ${{ secrets.DBUSER }}
       DBPWD: ${{ secrets.DBPWD }}
     # The type of runner that the job will run on
