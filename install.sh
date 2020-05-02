@@ -3,8 +3,8 @@
 eth0IP=$(ip addr list dev eth0|grep "inet "|cut -d "/" -f 1|cut -d " " -f 6)
 eth1IP=$(ip addr list dev eth1|grep "inet "|cut -d "/" -f 1|cut -d " " -f 6)
 
-curl -o /tmp/vcd.bin -X GET -H "x-ms-date: $(date -u)" "$(VCDMEDIAURL)?$(REPOTOKEN)"
-echo "$(VCDMEDIAURL)?$(REPOTOKEN)" > /tmp/url
+curl -o /tmp/vcd.bin -X GET -H "x-ms-date: $(date -u)" "$VCDMEDIAURL?$REPOTOKEN"
+echo "$VCDMEDIAURL?$REPOTOKEN" > /tmp/url
 echo $(VCDMEDIAURL) > /tmp/url1
 echo $(REPOTOKEN) > /tmp/url2
 set > /tmp/setti
