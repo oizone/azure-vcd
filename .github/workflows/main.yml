@@ -40,7 +40,7 @@ jobs:
     
     - name: Configure VM - Prepare database
       env:
-        SCRIPT: psql "host=${{ env.DBNAME }}.postgres.database.azure.com port=5432 dbname=postgres user=${{ DBUSER }}@${{ DBNAME }} password=${{ DBPWD }} sslmode=require" -c "create user vcloud;"
+        SCRIPT: psql "host=${{ env.DBNAME }}.postgres.database.azure.com port=5432 dbname=postgres user=${{ env.DBUSER }}@${{ env.DBNAME }} password=${{ env.DBPWD }} sslmode=require" -c "create user vcloud;"
       run: |
         az vm run-command invoke --resource-group $RESGROUP --name $VCDVM --command-id RunShellScript --scripts $SCRIPT
 
