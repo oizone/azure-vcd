@@ -22,7 +22,7 @@ jobs:
       VCDVMSIZE: "Standard_B2ms"
       VCDVMOS: "OpenLogic:CentOS:7.5:latest"
       VCDVMUSER: azureuser
-      DBNAME: vcddb-${{ GITHUB_SHA }}
+      #DBNAME: vcddb-${{ GITHUB_SHA }}
       DBNAME: vcddb
       DBUSER: ${{ secrets.DBUSER }}
       DBPWD: ${{ secrets.DBPWD }}
