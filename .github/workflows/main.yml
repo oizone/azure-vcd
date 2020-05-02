@@ -1,4 +1,4 @@
-name: CI
+ame: CI
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
@@ -93,7 +93,7 @@ jobs:
         az vm run-command invoke --resource-group $RESGROUP --name $VCDVM --command-id RunShellScript --scripts @dbconfig.sh --parameters "DBNAME=${{ env.DBNAME}}" "DBUSER=${{ env.DBUSER }}" "DBPWD=${{ env.DBPWD }}"
 
     - name: Configure VM - Update OS
-      run: yum -y update
+      run: az vm run-command invoke --resource-group $RESGROUP --name $VCDVM --command-id RunShellScript --scripts "yum -y update"
 
     - name: Configure VM - Install vCD
       run: |
