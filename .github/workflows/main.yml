@@ -99,13 +99,16 @@ jobs:
       run: |
         az vm run-command invoke --resource-group $RESGROUP --name $VCDVM --command-id RunShellScript --scripts @install.sh --parameters "VCDMEDIAURL=${{ env.VCDMEDIAURL }}" "DBNAME=${{ env.DBNAME}}" "DBUSER=${{ env.DBUSER }}" "DBPWD=${{ env.DBPWD }}" "VCDMEDIAURL=${{ env.VCDMEDIAURL }}" "VCDUSER=${{ env.VCDUSER }}" "VCDPWD=${{ env.VCDPWD }}" "VCDEMAIL=${{ env.VCDEMAIL }}" "VCDCERTPWD=${{ env.VCDCERTPWD }}" "REPOTOKEN='${{ env.REPOTOKEN }}'" "VCDCERTURL='${{ env.VCDCERTURL }}'"
 
+    - name: Configure VM - Reboot
+      run: az vm restart --resource-group $RESGROUP --name $VCDVM
+
     - name: Create application gateway
       env:
         CERTPWD: ${{ secrets.CERTPWD }}
       run: |
         curl -o certificate.pfx -X GET -H "x-ms-date: $(date -u)" "${{ env.LBCERTURL }}?${{ env.REPOTOKEN }}"
         az network application-gateway create --name "vCD-Portal" --resource-group $RESGROUP --location $REGION --capacity 1 --sku Standard_v2 --vnet-name $VNET --subnet "vCD-AppGW" --public-ip-address "vCD-portal" --cert-file certificate.pfx --cert-password $CERTPWD --servers 10.255.0.10 10.255.0.11 10.255.0.12 10.255.0.13 10.255.0.14
-	az network application-gateway http-settings update --resource-group $RESGROUP --gateway-name "vCD-portal" -n "appGatewayBackendHttpSettings" --host-name $VCDURL --protocol https --port 443
+        az network application-gateway http-settings update --resource-group $RESGROUP --gateway-name "vCD-portal" -n "appGatewayBackendHttpSettings" --host-name $VCDURL --protocol https --port 443
 
     - name: Configure DNS
       run: |
