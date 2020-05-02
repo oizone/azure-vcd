@@ -40,5 +40,5 @@ jobs:
     
     - name: Configure VM - Prepare database
       run: |
-        az vm run-command invoke --resource-group $RESGROUP --name $VCDVM --command-id RunShellScript --scripts 'psql "host=$DBNAME.postgres.database.azure.com port=5432 dbname=postgres user=$DBUSER@$DBNAME password=$DBPWD sslmode=require" -c "create user vcloud;"' -parameters "DBNAME=${{ env.DBNAME}}" "DBUSER=${{ env.DBUSER }}" "DBPWD=${{ env.DBPWD }}"
+        az vm run-command invoke --resource-group $RESGROUP --name $VCDVM --command-id RunShellScript --scripts 'psql "host=$DBNAME.postgres.database.azure.com port=5432 dbname=postgres user=$DBUSER@$DBNAME password=$DBPWD sslmode=require" -c "create user vcloud;"' --parameters "DBNAME=${{ env.DBNAME}}" "DBUSER=${{ env.DBUSER }}" "DBPWD=${{ env.DBPWD }}"
 
