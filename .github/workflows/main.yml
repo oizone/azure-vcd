@@ -26,6 +26,8 @@ jobs:
       VCDUSER: ${{ secrets.VCDUSER }}
       VCDEMAIL: ${{ secrets.VCDEMAIL }}
       VCDPWD: ${{ secrets.VCDPWD }}
+      VCDURL: ${{ secrets.VCDURL }}
+      VCDCONSOLEURL: ${{ secrets.VCDCONSOLEURL }}
       REPOTOKEN: ${{ secrets.SASTOKEN }}
       DBNAME: vcddb
       DBUSER: ${{ secrets.DBUSER }}
@@ -46,10 +48,67 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     
+    - name: Delete resource group if exists
+      run: az group delete --name $RESGROUP --yes || true
+
+    - name: Create resource group
+      run: az group create --location $REGION --name $RESGROUP
+
+    - name: Create network
+      run: |
+        az network nsg create --name "vCD-VM-SecGrp" --resource-group $RESGROUP --location $REGION
+        az network nsg create --name "vCD-console-SecGrp" --resource-group $RESGROUP --location $REGION
+        az network vnet create --name $VNET --resource-group $RESGROUP --address-prefixes "10.255.0.0/24" --location $REGION
+        az network vnet subnet create --address-prefixes "10.255.0.0/29" --name "vCD-AppGW" --resource-group $RESGROUP --vnet-name $VNET
+        az network vnet subnet create --address-prefixes "10.255.0.8/29" --name "vCD-Portal" --resource-group $RESGROUP --vnet-name $VNET --service-endpoints "Microsoft.Sql" --network-security-group "vCD-VM-SecGrp"
+        az network vnet subnet create --address-prefixes "10.255.0.16/29" --name "vCD-Console" --resource-group $RESGROUP --vnet-name $VNET --network-security-group "vCD-console-SecGrp"
+        az network public-ip create --name "vCD-VM" --resource-group $RESGROUP --allocation-method Static --location $REGION --sku Basic
+        az network public-ip create --name "vCD-console" --resource-group $RESGROUP --allocation-method Static --location $REGION  --sku Basic
+        az network public-ip create --name "vCD-portal" --resource-group $RESGROUP --allocation-method Static --location $REGION --sku Standard
+        az network nic create --name "Portal-NIC" --resource-group $RESGROUP --location $REGION --subnet "vCD-Portal" --vnet-name $VNET --public-ip-address "vCD-VM"
+        az network nic create --name "Console-NIC" --resource-group $RESGROUP --location $REGION --subnet "vCD-Console" --vnet-name $VNET --public-ip-address "vCD-console"
+
+    - name: Create VM
+      env:
+        SSHKEY: ${{ secrets.SSHKEY }}
+      run: |
+        echo "$SSHKEY" > sshid
+        az vm create --name $VCDVM --resource-group $RESGROUP --location $REGION --admin-username $VCDVMUSER --image $VCDVMOS --ssh-key-values @sshid --nics "Portal-NIC" "Console-NIC" --size $VCDVMSIZE
+
+    - name: Allow SSH in
+      run: |
+        az network nsg rule create --name "AllowInboundSSH" --nsg-name "vCD-VM-SecGrp" --priority 1000 --resource-group $RESGROUP --access Allow --destination-address-prefixes "*" --destination-port-ranges 22 --direction Inbound --protocol Tcp --source-address-prefixes "*" --source-port-ranges "*"
+        az network nsg rule create --name "AllowInboundSSH" --nsg-name "vCD-console-SecGrp" --priority 1000 --resource-group $RESGROUP --access Allow --destination-address-prefixes "*" --destination-port-ranges 443 --direction Inbound --protocol Tcp --source-address-prefixes "*" --source-port-ranges "*"
+
+    - name: Create application gateway
+      env:
+        CERTPWD: ${{ secrets.CERTPWD }}
+      run: |
+        curl -o certificate.pfx -X GET -H "x-ms-date: $(date -u)" "${{ env.LBCERTURL }}?${{ env.REPOTOKEN }}"
+        az network application-gateway create --name "vCD-Portal" --resource-group $RESGROUP --location $REGION --capacity 1 --sku Standard_v2 --vnet-name $VNET --subnet "vCD-AppGW" --public-ip-address "vCD-portal" --cert-file certificate.pfx --cert-password $CERTPWD --servers 10.255.0.10 10.255.0.11 10.255.0.12 10.255.0.13 10.255.0.14
+
+    - name: Create database
+      run: |
+        az postgres server create --resource-group $RESGROUP --name $DBNAME --ssl-enforcement disabled --sku-name GP_Gen5_4 --backup-retention 7 --geo-redundant-backup disabled --location $REGION --storage-size 20480 --version 10 --admin-user $DBUSER --admin-password $DBPWD
+        az postgres server vnet-rule create --name "vCD-portal" --resource-group $RESGROUP --server-name $DBNAME --subnet "vCD-Portal" --vnet-name $VNET
+
+    - name: Configure VM - Install packages
+      run: az vm run-command invoke --resource-group $RESGROUP --name $VCDVM --command-id RunShellScript --scripts @install-packages.sh
+
+    - name: Configure VM - Config DB
+      run: |
+        az vm run-command invoke --resource-group $RESGROUP --name $VCDVM --command-id RunShellScript --scripts @dbconfig.sh --parameters "DBNAME=${{ env.DBNAME}}" "DBUSER=${{ env.DBUSER }}" "DBPWD=${{ env.DBPWD }}"
+
+    - name: Configure VM - Install vCD
+      run: |
+        az vm run-command invoke --resource-group $RESGROUP --name $VCDVM --command-id RunShellScript --scripts @install.sh --parameters "VCDMEDIAURL=${{ env.VCDMEDIAURL }}" "DBNAME=${{ env.DBNAME}}" "DBUSER=${{ env.DBUSER }}" "DBPWD=${{ env.DBPWD }}" "VCDMEDIAURL=${{ env.VCDMEDIAURL }}" "VCDUSER=${{ env.VCDUSER }}" "VCDPWD=${{ env.VCDPWD }}" "VCDEMAIL=${{ env.VCDEMAIL }}" "VCDCERTPWD=${{ env.VCDCERTPWD }}" "REPOTOKEN='${{ env.REPOTOKEN }}'" "VCDCERTURL='${{ env.VCDCERTURL }}'"
+
     - name: Configure DNS
       run: |
-        sed -i 's/###PORTALNAME###/1.public.ci.demo.tieto.com/' dns.json
-        sed -i 's/###PORTALIP###/3.4.5.3/' dns.json
-        sed -i 's/###CONSOLENAME###/1c.public.ci.demo.tieto.com/' dns.json
-        sed -i 's/###CONSOLEIP###/1.2.3.4/' dns.json
+        PORTAL=$(az network public-ip show --name "vCD-portal" --resource-group vCD |grep ipAddress|cut -d":" -f 2|cut -d '"' -f 2)
+        CONSOLE=$(az network public-ip show --name "vCD-console" --resource-group vCD |grep ipAddress|cut -d":" -f 2|cut -d '"' -f 2)
+        sed -i 's/###PORTALNAME###/$VCDURL/' dns.json
+        sed -i 's/###PORTALIP###/$PORTAL/' dns.json
+        sed -i 's/###CONSOLENAME###/$VCDCONSOLEURL/' dns.json
+        sed -i 's/###CONSOLEIP###/$CONSOLE/' dns.json
         aws route53 change-resource-record-sets --hosted-zone-id $AWS_HOSTED_ZONE_ID --change-batch file://dns.json
