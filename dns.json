@@ -1,0 +1,20 @@
+{
+"Comment": "CREATE/DELETE/UPSERT a record ",
+"Changes": [{
+    "Action": "UPSERT",
+    "ResourceRecordSet": {
+	"Name": "###PORTALNAME###",
+	"Type": "A",
+	"TTL": 300,
+	"ResourceRecords": [{ "Value": "###PORTALIP###"}]
+    }},
+{
+    "Action": "UPSERT",
+    "ResourceRecordSet": {
+	"Name": "###CONSOLENAME###",
+	"Type": "A",
+	"TTL": 300,
+	"ResourceRecords": [{ "Value": "###CONSOLEIP###"}]
+    }}
+]
+}
