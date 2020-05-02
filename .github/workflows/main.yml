@@ -53,4 +53,3 @@ jobs:
         sed -i 's/###CONSOLENAME###/1c.public.ci.demo.tieto.com/' dns.json
         sed -i 's/###CONSOLEIP###/1.2.3.4/' dns.json
         aws route53 change-resource-record-sets --hosted-zone-id $AWS_HOSTED_ZONE_ID --change-batch file://dns.json
-	
