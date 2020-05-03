@@ -9,5 +9,5 @@ eth0IP=$(ip addr list dev eth0|grep "inet "|cut -d "/" -f 1|cut -d " " -f 6)
 
 AUTH=`curl -I --insecure -k -H "Accept:application/*+xml;version=34.0" -u $VCDUSER@system:$VCDPWD -X POST https://$eth0IP/api/sessions|grep "x-vcloud-authorization"|sed -e 's/^\(.\{56\}\).*/\1/'`
 echo $AUTH
-curl -w --insecure -k -H "Accept:application/*+json;version=34.0" -H "$AUTH" -H "Content-Type:application/*+json" -X PUT --data-ascii @url.json https://$eth0IP/api/admin/extension/settings/general
+curl -w "%{http_code}\n" --insecure -k -H "Accept:application/*+json;version=34.0" -H "$AUTH" -H "Content-Type:application/*+json" -X PUT --data-ascii @url.json https://$eth0IP/api/admin/extension/settings/general
 
