@@ -18,7 +18,7 @@ jobs:
       VNET: vCD-NET
       VCDVM: vCD
       VCDVMSIZE: "Standard_B2ms"
-      DBSKU: "B_Gen5_2"
+      DBSKU: "GP_Gen5_2"
       VCDVMOS: "OpenLogic:CentOS:7.7:latest"
       VCDVMUSER: azureuser
       VCDMEDIAURL: https://vmwaredepot.blob.core.windows.net/media/vmware-vcloud-director-distribution-10.1.0-15967253.bin
@@ -79,7 +79,7 @@ jobs:
 
     - name: Create database
       run: |
-        az postgres server create --resource-group $RESGROUP --name $DBNAME --sku-name $DBSKU --backup-retention 7 --location $REGION --storage-size 5120 --version 10 --admin-user $DBUSER --admin-password $DBPWD
+        az postgres server create --resource-group $RESGROUP --name $DBNAME --ssl-enforcement disabled --sku-name $DBSKU --backup-retention 7 --geo-redundant-backup disabled --location $REGION --storage-size 5120 --version 10 --admin-user $DBUSER --admin-password $DBPWD
         az postgres server vnet-rule create --name "vCD-portal" --resource-group $RESGROUP --server-name $DBNAME --subnet "vCD-Portal" --vnet-name $VNET
 
     - name: Configure VM - Install packages
