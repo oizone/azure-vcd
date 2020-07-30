@@ -19,7 +19,7 @@ jobs:
       VCDVM: vCD
       VCDVMSIZE: "Standard_B2ms"
       DBSKU: "GP_Gen5_2"
-      VCDVMOS: "OpenLogic:CentOS:7.8:latest"
+      VCDVMOS: "OpenLogic:CentOS:7.7:latest"
       VCDVMUSER: azureuser
       VCDMEDIAURL: https://vmwaredepot.blob.core.windows.net/media/vmware-vcloud-director-distribution-10.1.1-16288798.bin
       VCDCERTURL: ${{ secrets.VCDCERTURL }}
