@@ -15,6 +15,7 @@ jobs:
     env:
       REGION: westeurope
       RESGROUP: vCD
+      AZURESUBSCRIPTION: ${{ secrets.AZURESUBSCRIPTION }} 
       VNET: vCD-NET
       VCDVM: vCD
       VCDVMSIZE: "Standard_B2ms"
@@ -51,6 +52,9 @@ jobs:
     
     - name: Delete resource group if exists
       run: az group delete --name $RESGROUP --yes || true
+    
+    - name: Select subscription
+      run: az account set --subscription $AZURESUBSCRIPTION
 
     - name: Create resource group
       run: az group create --location $REGION --name $RESGROUP
