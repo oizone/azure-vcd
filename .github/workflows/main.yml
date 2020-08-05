@@ -63,10 +63,10 @@ jobs:
       run: |
         az network nsg create --name "vCD-VM-SecGrp" --resource-group $RESGROUP --location $REGION
         az network nsg create --name "vCD-console-SecGrp" --resource-group $RESGROUP --location $REGION
-        az network vnet create --name $VNET --resource-group $RESGROUP --address-prefixes "10.255.0.0/24" --location $REGION
-        az network vnet subnet create --address-prefixes "10.255.0.0/29" --name "vCD-AppGW" --resource-group $RESGROUP --vnet-name $VNET
-        az network vnet subnet create --address-prefixes "10.255.0.8/29" --name "vCD-Portal" --resource-group $RESGROUP --vnet-name $VNET --service-endpoints "Microsoft.Sql" --network-security-group "vCD-VM-SecGrp"
-        az network vnet subnet create --address-prefixes "10.255.0.16/29" --name "vCD-Console" --resource-group $RESGROUP --vnet-name $VNET --network-security-group "vCD-console-SecGrp"
+        az network vnet create --name $VNET --resource-group $RESGROUP --address-prefixes "10.254.0.0/24" --location $REGION
+        az network vnet subnet create --address-prefixes "10.254.0.0/29" --name "vCD-AppGW" --resource-group $RESGROUP --vnet-name $VNET
+        az network vnet subnet create --address-prefixes "10.254.0.8/29" --name "vCD-Portal" --resource-group $RESGROUP --vnet-name $VNET --service-endpoints "Microsoft.Sql" --network-security-group "vCD-VM-SecGrp"
+        az network vnet subnet create --address-prefixes "10.254.0.16/29" --name "vCD-Console" --resource-group $RESGROUP --vnet-name $VNET --network-security-group "vCD-console-SecGrp"
         az network public-ip create --name "vCD-console" --resource-group $RESGROUP --allocation-method Static --location $REGION  --sku Basic
         az network public-ip create --name "vCD-portal" --resource-group $RESGROUP --allocation-method Static --location $REGION --sku Standard
         az network nic create --name "Portal-NIC" --resource-group $RESGROUP --location $REGION --subnet "vCD-Portal" --vnet-name $VNET
@@ -108,7 +108,7 @@ jobs:
         CERTPWD: ${{ secrets.CERTPWD }}
       run: |
         curl -o certificate.pfx -X GET -H "x-ms-date: $(date -u)" "${{ env.LBCERTURL }}?${{ env.REPOTOKEN }}"
-        az network application-gateway create --name "vCD-Portal" --resource-group $RESGROUP --location $REGION --capacity 1 --sku Standard_v2 --vnet-name $VNET --subnet "vCD-AppGW" --public-ip-address "vCD-portal" --cert-file certificate.pfx --cert-password $CERTPWD --servers 10.255.0.10 10.255.0.11 10.255.0.12 10.255.0.13 10.255.0.14
+        az network application-gateway create --name "vCD-Portal" --resource-group $RESGROUP --location $REGION --capacity 1 --sku Standard_v2 --vnet-name $VNET --subnet "vCD-AppGW" --public-ip-address "vCD-portal" --cert-file certificate.pfx --cert-password $CERTPWD --servers 10.254.0.10 10.254.0.11 10.254.0.12 10.254.0.13 10.254.0.14
         az network application-gateway http-settings update --resource-group $RESGROUP --gateway-name "vCD-portal" -n "appGatewayBackendHttpSettings" --host-name $VCDURL --protocol https --port 443
 
     - name: Configure VM - Set public URL
