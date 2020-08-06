@@ -69,10 +69,12 @@ jobs:
         az network vnet subnet create --address-prefixes "10.254.0.16/29" --name "vCD-Console" --resource-group $RESGROUP --vnet-name $VNET --network-security-group "vCD-console-SecGrp"
         az network public-ip create --name "vCD-console" --resource-group $RESGROUP --allocation-method Static --location $REGION  --sku Basic
         az network public-ip create --name "vCD-portal" --resource-group $RESGROUP --allocation-method Static --location $REGION --sku Standard
+        az network public-ip create --name "vCD-gw" --resource-group $RESGROUP --allocation-method Dynamic --location $REGION  --sku Basic
         az network nic create --name "Portal-NIC" --resource-group $RESGROUP --location $REGION --subnet "vCD-Portal" --vnet-name $VNET
         az network nic create --name "Console-NIC" --resource-group $RESGROUP --location $REGION --subnet "vCD-Console" --vnet-name $VNET --public-ip-address "vCD-console"
         az network nsg rule create --name "AllowInboundHTTPS" --nsg-name "vCD-console-SecGrp" --priority 1000 --resource-group $RESGROUP --access Allow --destination-address-prefixes "*" --destination-port-ranges 443 --direction Inbound --protocol Tcp --source-address-prefixes "*" --source-port-ranges "*"
         az network nsg rule create --name "AllowInboundSSH" --nsg-name "vCD-console-SecGrp" --priority 1001 --resource-group $RESGROUP --access Allow --destination-address-prefixes "*" --destination-port-ranges 22 --direction Inbound --protocol Tcp --source-address-prefixes "*" --source-port-ranges "*"
+	az network vnet-gateway create --resource-group $RESGROUP --name "vCD-gw" --public-ip-address "vCD-gw" --vnet $VNET --gateway-type ExpressRoute --sku VpnGw1 --vpn-type PolicyBased
 
     - name: Create VM
       env:
