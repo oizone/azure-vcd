@@ -22,7 +22,7 @@ jobs:
       DBSKU: "GP_Gen5_2"
       VCDVMOS: "OpenLogic:CentOS:7.7:latest"
       VCDVMUSER: azureuser
-      VCDMEDIAURL: https://vmwaredepot.blob.core.windows.net/media/vmware-vcloud-director-distribution-10.1.1-16288798.bin
+      VCDMEDIAURL: https://vmwaredepot.blob.core.windows.net/media/vmware-vcloud-director-distribution-10.2.0-16892613.bin
       VCDCERTURL: ${{ secrets.VCDCERTURL }}
       VCDCERTPWD: ${{ secrets.VCDCERTPWD }}
       VCDUSER: ${{ secrets.VCDUSER }}
